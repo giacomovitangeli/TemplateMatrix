@@ -7,10 +7,14 @@
 #include "../Matrix.h"
 
 TEST(Matrix, DefaultConstructor) {
+    Matrix<int> m;
+    ASSERT_EQ(3, m.getWidth());
+    ASSERT_EQ(3, m.getHeight());
+}
 
-    Matrix m;
-    ASSERT_EQ(0, m.getWidth());
-    ASSERT_EQ(0, m.getHeight());
-    ASSERT_EQ(nullptr, m.getBuffer());
+TEST(Matrix, Constructor){
+    Matrix<int> m(4, 5);
+    ASSERT_EQ(4, m.getWidth());
+    ASSERT_EQ(5, m.getHeight());
 }
 

@@ -7,15 +7,22 @@
 
 
 #include <iostream>
+#include <exception>
 
 template<typename T>
 class Matrix {
 public:
-    Matrix(int w = 0, int h = 0) : width(w), height(h) {
-        if (width == 0 && height == 0)
-            buffer = nullptr;
-        else
+    Matrix(int w = 3, int h = 3) : width(w), height(h) {
+        try {
+            initMatrix();
+        } catch (const std::out_of_range& e) {
+            std::cerr << e.what() << std::endl;
+            std::cout << "...Generating a default matrix..." << std::endl;
+            width = 3;
+            height = 3;
             buffer = new T[width*height];
+            setMatrixValues();
+        } catch (...) {}
     }
 
     ~Matrix() {
@@ -23,20 +30,23 @@ public:
     }
 
     void initMatrix() {
-        for (int i = 0; i < (width*height); i++)
-            buffer[i] = 0;
+        if (width <= 0 || height <= 0)
+            throw std::out_of_range("Out of Range");
+        else {
+            buffer = new T[width*height];
+            setMatrixValues();
+        }
     }
 
-    explicit Matrix(const T& o) {
-        width = o.width;
-        height = o.height;
-
-        if (o.buffer != nullptr) {
+    explicit Matrix(const Matrix& o) {
+        if (o.width > 0 && o.height > 0) {
+            width = o.width;
+            height = o.height;
             buffer = new T[width*height];
             for (int i = 0; i < (width*height); i++)
                 buffer[i] = o.buffer[i];
         } else
-            buffer = nullptr;
+            throw std::out_of_range("Out of Range");
     }
 
     Matrix& operator=(const Matrix& rhs) {
@@ -44,14 +54,14 @@ public:
             if (buffer != nullptr)
                 delete[] buffer;
 
-            width = rhs.width;
-            height = rhs.height;
-            if (rhs.buffer != nullptr) {
+            if (rhs.width > 0 && rhs.height > 0) {
+                width = rhs.width;
+                height = rhs.height;
                 buffer = new T[width*height];
                 for (int i = 0; i < (width*height); i++)
                     buffer[i] = rhs.buffer[i];
             } else
-                buffer = nullptr;
+                throw std::out_of_range("Out of Range");
         }
         return *this;
     }
@@ -65,6 +75,21 @@ public:
             std::cout << buffer[i] << " ";
         }
         std::cout << std::endl;
+    }
+
+    void setMatrixValues() {
+        T value;
+        std::cout << std::endl << "Setting the values of the matrix: " << std::endl;
+        for (int i = 0; i < (height); i++) {
+            for (int j = 0; j < width; j++) {
+                std::cout << "Matrix[" << i << ", " << j << "]: ";
+                std::cin >> value;
+                std::cout << std::endl;
+                setValue(i, j, value);
+            }
+        }
+        std::cout << "Setting completed succesfully!" << std::endl;
+        printMatrix();
     }
 
     void setValue(int x, int y, T& value) {
