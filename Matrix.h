@@ -14,70 +14,10 @@
 template<typename T>
 class Matrix {
 public:
-    Matrix(int h = 3, int w = 3, std::string n = "Default", std::string im = "auto") : height(h), width(w), name(n),
-                                                                                       initMode(im) {
-        try {
-            initMatrix();
-        } catch (const std::out_of_range& e) {
-            std::cerr << e.what() << std::endl;
-            std::cout << "...Generating a default matrix..." << std::endl;
-            width = 3;
-            height = 3;
-            buffer = new T[width*height];
-            initNullMatrix();
-        } catch (const std::invalid_argument& e) {
-            e.what();
-            std::cout << "...Generating a default matrix..." << std::endl;
-            width = 3;
-            height = 3;
-            buffer = new T[width*height];
-            initNullMatrix();
-        } catch (...) {}
-    }
+    Matrix<T>(){};
 
     ~Matrix() {
         delete[] buffer;
-    }
-
-    void initMatrix() {
-        if (initMode == "manual")
-            initMatrixManually();
-        else if (initMode == "rauto")
-            initRandomMatrix();
-        else if (initMode == "auto")
-            initNullMatrix();
-        else
-            throw std::invalid_argument("Can't resolve the initialization mode selected!");
-    }
-
-    void initMatrixManually() {
-        if (width <= 0 || height <= 0)
-            throw std::out_of_range("Out of Range");
-        else {
-            buffer = new T[width*height];
-            setMatrixValues();
-        }
-    }
-
-    void initRandomMatrix() {
-        if (width <= 0 || height <= 0)
-            throw std::out_of_range("Out of Range");
-        else {
-            srand(time(NULL));
-            buffer = new T[width*height];
-            for (int i = 0; i < (height*width); i++)
-                buffer[i] = rand()%100; //Init in the range 0 to 99
-        }
-    }
-
-    void initNullMatrix() {
-        if (width <= 0 || height <= 0)
-            throw std::out_of_range("Out of Range");
-        else {
-            buffer = new T[width*height];
-            for (int i = 0; i < (height*width); i++)
-                buffer[i] = 0;
-        }
     }
 
     explicit Matrix(const Matrix& o) {
@@ -108,7 +48,7 @@ public:
         return *this;
     }
 
-    Matrix<T>& product(Matrix<T>& A, Matrix<T>& B) { //Product operator overloading to use it with template matrices
+    Matrix<T>& matrixProduct(Matrix<T>& A, Matrix<T>& B) { //Product with template matrices
         if (A.width == B.height) {
             width = B.width;
             height = A.height;
@@ -157,6 +97,25 @@ public:
         return v;
     }
 
+    Matrix<T>& transposedMatrix(Matrix<T>& m) {   //Change row with columns
+        height = m.width;
+        width = m.height;
+        if (buffer != 0)
+            delete[] buffer;
+        buffer = new T[height*width];
+        std::vector<T> rowM;
+
+        for (int i = 0; i < width; i++) {
+            rowM = m.getRow(m, i);
+            int k = i;
+            for (int j = 0; j < height; j++) {
+                buffer[k] = rowM[j];
+                k += width;
+            }
+        }
+        return *this;
+    }
+
     void printMatrix() {
         std::cout << std::endl << "Print " << name << " Matrix: ";
         for (int i = 0; i < (width*height); i++) {
@@ -167,27 +126,37 @@ public:
         std::cout << std::endl;
     }
 
-    void setMatrixValues() {
-        T value;
-        std::cout << std::endl << "Setting the values of the matrix: " << std::endl;
-        for (int i = 0; i < height; i++) {
-            for (int j = 0; j < width; j++) {
-                std::cout << "Matrix[" << i << ", " << j << "]: ";
-                std::cin >> value;
-                std::cout << std::endl;
-                setValue(i, j, value);
-            }
-        }
-        std::cout << "Setting completed succesfully!" << std::endl;
-        printMatrix();
-    }
-
     void setValue(int x, int y, T& value) {
         buffer[x*width+y] = value;
     }
 
+    void setValue(int i, T value) {
+        buffer[i] = value;
+    }
+
+    T& getValue(int i) const {
+        return buffer[i];
+    }
+
+    T& getValue(int x, int y) const {
+        return buffer[x*width+y];
+    }
+
+
     int getWidth() const {
         return width;
+    }
+
+    void setWidth(int width) {
+        Matrix::width = width;
+    }
+
+    void setHeight(int height) {
+        Matrix::height = height;
+    }
+
+    void setBuffer(T* buffer) {
+        Matrix::buffer = buffer;
     }
 
     int getHeight() const {
@@ -198,10 +167,18 @@ public:
         return buffer;
     }
 
+    const std::string& getName() const {
+        return name;
+    }
+
+    void setName(const std::string& name) {
+        Matrix::name = name;
+    }
+
 private:
     int width, height;
     T* buffer;
-    std::string name, initMode;
+    std::string name;
 };
 
 

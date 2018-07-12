@@ -5,4 +5,4 @@ set(CMAKE_CXX_STANDARD 11)
 
 add_subdirectory(test)
 
-add_executable(TemplateMatrix main.cpp Matrix.h)
+add_executable(TemplateMatrix main.cpp Matrix.h TemplateMatrixFactory.h)
