@@ -17,65 +17,37 @@ private:
     Mode initMode;
     Matrix<T>* result;
 
+
 public:
     TemplateMatrixFactory<T>() : initMode(Mode::stdauto), result(nullptr) {};
 
-    Matrix<T>* createMatrix(std::string n = "Default", Mode inMode = Mode::stdauto) {
+    Matrix<T>* createMatrix(std::string n = "Default", Mode inMode = Mode::stdauto, int h = 3, int w = 3) {
+        if (h <= 0 || w <= 0)
+            throw std::out_of_range("Out of Range");
+
         result = new Matrix<T>;
         initMode = inMode;
         result->setName(n);
+        result->setHeight(h);
+        result->setWidth(w);
 
         try {
-            initMatrix();
-        } catch (const std::out_of_range& e) {
-            std::cerr << e.what() << std::endl;
-            std::cout << "...Generating a default matrix..." << std::endl;
-            result->setWidth(3);
-            result->setHeight(3);
-            result->setBuffer(new T[result->getWidth()*result->getHeight()]);
-            initNullMatrix();
-        } catch (const std::invalid_argument& e) {
+            if (initMode == Mode::manual)
+                initMatrixManually();
+            else if (initMode == Mode::rauto)
+                initRandomMatrix();
+            else if (initMode == Mode::stdauto)
+                initNullMatrix();
+            else
+                throw std::invalid_argument("Can't resolve the initialization mode selected!");
+        }catch(std::invalid_argument& e){
             e.what();
-            std::cout << "...Generating a default matrix..." << std::endl;
-            result->setWidth(3);
-            result->setHeight(3);
-            result->setBuffer(new T[result->getWidth()*result->getHeight()]);
+            std::cout<<"Incorrect initialization mode has been replaced with the default initialization";
+            initMode = Mode::stdauto;
             initNullMatrix();
-        } catch (...) {}
+        }catch(...){}
 
         return result;
-    }
-
-    void insertAll() {
-        int height, width;
-
-        std::cout << "Initialization of " << result->getName() << " Matrix" << std::endl;
-
-        std::cout << "Insert the number of " << result->getName() << "'s rows: ";
-        std::cin >> height;
-        result->setHeight(height);
-        std::cout << std::endl;
-
-        std::cout << "Insert the number of " << result->getName() << "'s columns: ";
-        std::cin >> width;
-        result->setWidth(width);
-        std::cout << std::endl;
-
-        if (initMode == Mode::manual)
-            initMatrixManually();
-        else
-            initRandomMatrix();
-    }
-
-    void initMatrix() {
-        if (initMode == Mode::manual)
-            insertAll();
-        else if (initMode == Mode::rauto)
-            insertAll();
-        else if (initMode == Mode::stdauto)
-            initNullMatrix();
-        else
-            throw std::invalid_argument("Can't resolve the initialization mode selected!");
     }
 
     void initMatrixManually() {
@@ -94,21 +66,17 @@ public:
             srand(time(NULL));
             result->setBuffer(new T[result->getWidth()*result->getHeight()]);
             for (int i = 0; i < (result->getWidth()*result->getHeight()); i++)
-                result->setValue(i, (rand()%100));
-            std::cout << result->getName() << " Random Matrix is completed succesfully!" << std::endl;
+                result->setValue(i, (rand()%10));
+            std::cout <<std::endl<< result->getName() << " Random Matrix is completed succesfully!" << std::endl;
             result->printMatrix();
         }
     }
 
     void initNullMatrix() {
-        result->setWidth(3);
-        result->setHeight(3);
         result->setBuffer(new T[result->getWidth()*result->getHeight()]);
         for (int i = 0; i < (result->getWidth()*result->getHeight()); i++)
             result->setValue(i, 0);
         std::cout<<std::endl;
-        std::cout << result->getName() << " Null Matrix is completed succesfully!" << std::endl;
-        result->printMatrix();
     }
 
     void setMatrixValues() {
@@ -122,7 +90,7 @@ public:
                 result->setValue(i, j, value);
             }
         }
-        std::cout << result->getName() << " Manual setting is completed succesfully!" << std::endl;
+        std::cout <<std::endl<< result->getName() << " Manual setting is completed succesfully!" << std::endl;
         result->printMatrix();
     }
 };

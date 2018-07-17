@@ -10,17 +10,18 @@
 #include <exception>
 #include <vector>
 #include <ctime>
+#include "TemplateMatrixFactory.h"
 
 template<typename T>
 class Matrix {
 public:
-    Matrix<T>(){};
+    Matrix<T>() {};
 
     ~Matrix() {
         delete[] buffer;
     }
 
-    explicit Matrix(const Matrix& o) {
+    Matrix<T>(const Matrix& o) {
         if (o.width > 0 && o.height > 0) {
             width = o.width;
             height = o.height;
@@ -48,37 +49,67 @@ public:
         return *this;
     }
 
-    Matrix<T>& matrixProduct(Matrix<T>& A, Matrix<T>& B) { //Product with template matrices
-        if (A.width == B.height) {
-            width = B.width;
-            height = A.height;
-            delete[] buffer;
-            buffer = new T[width*height];
+    Matrix<T>* product(Matrix<T>& B) { //Product between two template matrices
+        if (width == B.height) {
+            Matrix<T>* result = new Matrix<T>;
+            result->height = height;
+            result->width = B.width;
+            result->name = "MatrixProduct";
+            result->buffer = new T[height*width];
 
             int r = 0;
-            std::vector<T> rowA = A.getRow(A, r);
+            std::vector<T> rowA = getRow(*this, r);
             int c = 0;
             std::vector<T> colB = B.getColumn(B, c);
 
             for (int i = 0; i < (width*height); i++) {
-                if (c == A.height) {
+                if (c == height) {
                     r++;
-                    rowA = A.getRow(A, r);
+                    rowA = getRow(*this, r);
                     c = 0;
                     colB = B.getColumn(B, c);
                 }
 
-                for (int j = 0; j < A.width; j++)
-                    buffer[i] += rowA[j]*colB[j];
+                for (int j = 0; j < width; j++)
+                    result->buffer[i] += rowA[j]*colB[j];
 
                 c++;
                 colB = B.getColumn(B, c);
             }
+            return result;
 
         } else
             throw std::invalid_argument("Impossible to run the product between these two matrices");
+    }
 
-        return *this;
+    Matrix<T>* product(int lambda) { //Product between template matrix and template lambda
+        Matrix<T>* result = new Matrix<T>;
+        result->height = height;
+        result->width = width;
+        result->name = "ScalarProduct";
+        result->buffer = new T[height*width];
+
+
+        for (int i = 0; i < (width*height); i++)
+            result->buffer[i] = buffer[i] * lambda;
+
+        return result;
+    }
+
+    Matrix<T>* sum(Matrix<T>& B) { //Sum with template matrices
+        if (width == B.width && height == B.height) {
+            Matrix<T>* result = new Matrix<T>;
+            result->height = height;
+            result->width = width;
+            result->name = "Sum";
+            result->buffer = new T[height*width];
+
+            for (int i = 0; i < (width*height); i++)
+                result->buffer[i] = buffer[i]+B.buffer[i];
+
+            return result;
+        } else
+            throw std::invalid_argument("Impossible to run the sum between these two matrices");
     }
 
     std::vector<T> getRow(const Matrix<T>& m, int r) { //Return a row of a matrix
@@ -97,23 +128,24 @@ public:
         return v;
     }
 
-    Matrix<T>& transposedMatrix(Matrix<T>& m) {   //Change row with columns
-        height = m.width;
-        width = m.height;
-        if (buffer != 0)
-            delete[] buffer;
-        buffer = new T[height*width];
+    Matrix<T>* transposedMatrix() {   //Change row with columns
+        Matrix<T>* result = new Matrix<T>;
+        result->height = width;
+        result->width = height;
+        result->name = "Transpose";
+        result->buffer = new T[height*width];
+
         std::vector<T> rowM;
 
-        for (int i = 0; i < width; i++) {
-            rowM = m.getRow(m, i);
+        for (int i = 0; i < height; i++) {
+            rowM = getRow(*this, i);
             int k = i;
-            for (int j = 0; j < height; j++) {
-                buffer[k] = rowM[j];
-                k += width;
+            for (int j = 0; j < width; j++) {
+                result->buffer[k] = rowM[j];
+                k += height;
             }
         }
-        return *this;
+        return result;
     }
 
     void printMatrix() {
