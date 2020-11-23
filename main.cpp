@@ -13,9 +13,9 @@ int main() {
     TemplateMatrixFactory<int> tmf;
 
     try {
-        auto A = tmf.createMatrix("A", Mode::rauto, 2, 3);
-        auto B = tmf.createMatrix("B", Mode::rauto, 3, 2);
-        auto C = tmf.createMatrix("C", Mode::rauto, 2, 3);
+        auto A = tmf.createMatrix("A", Mode::rauto, 3, 4);
+        auto B = tmf.createMatrix("B", Mode::rauto, 4, 3);
+        auto C = tmf.createMatrix("C", Mode::rauto, 3, 4);
 
         auto pM = A->product(*B);
         pM->printMatrix();
@@ -29,6 +29,14 @@ int main() {
         int l = 2;
         auto pS = C->product(l);
         pS->printMatrix();
+
+        delete A;
+        delete B;
+        delete C;
+        delete pM;
+        delete At;
+        delete S;
+        delete pS;
 
     } catch (const std::out_of_range& e) {
         std::cerr << e.what() << std::endl;

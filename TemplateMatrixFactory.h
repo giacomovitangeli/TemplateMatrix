@@ -40,12 +40,12 @@ public:
                 initNullMatrix();
             else
                 throw std::invalid_argument("Can't resolve the initialization mode selected!");
-        }catch(std::invalid_argument& e){
+        } catch (std::invalid_argument& e) {
             e.what();
-            std::cout<<"Incorrect initialization mode has been replaced with the default initialization";
+            std::cout << "Incorrect initialization mode has been replaced with the default initialization";
             initMode = Mode::stdauto;
             initNullMatrix();
-        }catch(...){}
+        } catch (...) {}
 
         return result;
     }
@@ -67,7 +67,7 @@ public:
             result->setBuffer(new T[result->getWidth()*result->getHeight()]);
             for (int i = 0; i < (result->getWidth()*result->getHeight()); i++)
                 result->setValue(i, (rand()%10));
-            std::cout <<std::endl<< result->getName() << " Random Matrix is completed succesfully!" << std::endl;
+            std::cout << std::endl << result->getName() << " Random Matrix is completed succesfully!" << std::endl;
             result->printMatrix();
         }
     }
@@ -76,7 +76,7 @@ public:
         result->setBuffer(new T[result->getWidth()*result->getHeight()]);
         for (int i = 0; i < (result->getWidth()*result->getHeight()); i++)
             result->setValue(i, 0);
-        std::cout<<std::endl;
+        std::cout << std::endl;
     }
 
     void setMatrixValues() {
@@ -90,7 +90,7 @@ public:
                 result->setValue(i, j, value);
             }
         }
-        std::cout <<std::endl<< result->getName() << " Manual setting is completed succesfully!" << std::endl;
+        std::cout << std::endl << result->getName() << " Manual setting is completed succesfully!" << std::endl;
         result->printMatrix();
     }
 };

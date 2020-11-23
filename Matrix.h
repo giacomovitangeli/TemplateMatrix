@@ -91,7 +91,7 @@ public:
 
 
         for (int i = 0; i < (width*height); i++)
-            result->buffer[i] = buffer[i] * lambda;
+            result->buffer[i] = buffer[i]*lambda;
 
         return result;
     }
